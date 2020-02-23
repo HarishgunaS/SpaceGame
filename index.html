@@ -32,6 +32,8 @@
     var cursors;
     var ship;
     var last_angle = 0;
+    var last_speed = 0;
+    var max_speed = 100;
     function preload()
     {
         
@@ -63,14 +65,19 @@
         if(cursors.up.isDown)
         {
             
-            ship.setVelocityY(-100*Math.cos(ship.rotation));
-            ship.setVelocityX(100*Math.sin(ship.rotation));
+            ship.setVelocityY(-1*max_speed*Math.cos(ship.rotation));
+            ship.setVelocityX(max_speed*Math.sin(ship.rotation));
             last_angle = ship.rotation;
+            last_speed = max_speed;
         }
         else
         {
-            ship.setVelocityY(-25*Math.cos(last_angle));
-            ship.setVelocityX(25*Math.sin(last_angle));
+            ship.setVelocityY(-1*last_speed*Math.cos(last_angle));
+            ship.setVelocityX(last_speed*Math.sin(last_angle));
+            if (last_speed > 0)
+            {
+                last_speed -= 1;
+            }
             
         }
         
