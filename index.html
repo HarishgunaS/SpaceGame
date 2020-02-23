@@ -65,10 +65,13 @@
         if(cursors.up.isDown)
         {
             
-            ship.setVelocityY(-1*max_speed*Math.cos(ship.rotation));
-            ship.setVelocityX(max_speed*Math.sin(ship.rotation));
+            ship.setVelocityY(-1*last_speed*Math.cos(ship.rotation));
+            ship.setVelocityX(last_speed*Math.sin(ship.rotation));
             last_angle = ship.rotation;
-            last_speed = max_speed;
+            if (last_speed < max_speed)
+            {
+                last_speed += 1;
+            }
         }
         else
         {
