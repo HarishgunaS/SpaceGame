@@ -29,13 +29,14 @@
         }
     };
     var game = new Phaser.Game(config);
+    var cursors;
     function preload()
     {
         
     }
     function create()
     {
-        
+        cursors = this.input.keyboard.getCursorKeys();
     }
     function update()
     {
