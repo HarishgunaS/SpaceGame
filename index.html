@@ -34,10 +34,48 @@
     var last_angle = 0;
     var last_speed = 0;
     var max_speed = 100;
+    var num_enemies = 1;
+    var enemy_count = 0;
+    var enemy_speed = 50;
+    var previous_space = false;
+    function addEnemy()
+    {
+        var edge = Phaser.Math.Between(1,4);
+        var x;
+        var y;
+        if (edge === 1)
+        {
+            x = (ship.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+            y = 0;
+        }
+        else if (edge === 2)
+        {
+            x = 800;
+            y = (ship.y < 300) ? Phaser.Math.Between(300, 600) : Phaser.Math.Between(0, 300);
+        }
+        else if (edge === 3)
+        {
+            x = (ship.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+            y = 600;
+        }
+        else if (edge === 4)
+        {
+            x = 0;
+            y = (ship.y < 300) ? Phaser.Math.Between(300, 600) : Phaser.Math.Between(0, 300);
+        }
+        var enemy = enemies.create(x, y, 'enemy');
+    }
+    function shipCrashed(ship, enemy)
+    {
+        enemy_speed = 0;
+        last_speed = 0;
+        max_speed = 0;
+    }
     function preload()
     {
-        
-        this.load.image('ship', 'Assets/ship1.PNG')
+        this.load.image('enemy', 'Assets/enemy1.PNG');
+        this.load.image('ship', 'Assets/ship1.PNG');
+        this.load.image('laser', 'Assets/laser.png');
     }
     function create()
     {
@@ -45,15 +83,58 @@
         ship.setCollideWorldBounds(true);
         ship.allowRotation = true;
         cursors = this.input.keyboard.createCursorKeys();
+        enemies = this.physics.add.group();
+        ship_shots = this.physics.add.group();
+        this.physics.add.collider(ship, enemies, shipCrashed, null, this);
+        this.physics.add.collider(ship_shots, enemies, enemyHit, null, this);
+    }
+    function shoot()
+    {
+        var x = ship.x/1;
+        var y = ship.y/1;
+        var shot = ship_shots.create(x, y, 'laser');
+        shot.setVelocityY(-2*max_speed*Math.cos(ship.rotation));
+        shot.setVelocityX(2*max_speed*Math.sin(ship.rotation));
         
-        
+    }
+    function enemyHit(shot, enemy)
+    {
+        shot.destroy();
+        enemy.destroy();
+        enemy_count -= 1;
     }
     function update()
     {
+        enemies.children.iterate(function (child) {
+            y = child.y - ship.y;
+            x = child.x - ship.x;
+            child.rotation = Math.atan((y)/(x)) - Math.PI/2;
+            if (x < 0)
+                child.rotation += Math.PI;
+            else if (y < 0)
+                child.rotation += 2*Math.PI;
+            child.setVelocity(enemy_speed*Math.sin(child.rotation), -1*enemy_speed*Math.cos(child.rotation));
+            
+        });
+        if (cursors.space.isDown && !previous_space)
+        {
+            shoot();
+            previous_space = true;
+        }
+        else if (previous_space && !cursors.space.isDown)
+        {
+            previous_space = false;
+        }            
+        if (enemy_count < num_enemies)
+        {
+            addEnemy();
+            enemy_count += 1;
+        }
         if (cursors.left.isDown)
         {
             ship.body.angularVelocity = -300;
         }
+        
         else if (cursors.right.isDown)
         {
             ship.body.angularVelocity = 300;
@@ -70,7 +151,7 @@
             last_angle = ship.rotation;
             if (last_speed < max_speed)
             {
-                last_speed += 1;
+                last_speed += 2;
             }
         }
         else
