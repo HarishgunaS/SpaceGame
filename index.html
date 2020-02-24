@@ -96,12 +96,15 @@
         this.physics.add.collider(enemy_shots, ship, shipHit, null, this);
         this.physics.add.collider(enemies, enemies);
         this.physics.add.collider(ship, enemies);
-        scoreText = this.add.text(16,16, 'score: 0', {fontSize: '32px', fill: '#FFF'});
+        scoreText = this.add.text(16,16, 'Score: 0', {fontSize: '32px', fill: '#FFF'});
         
     }
     function shipHit(shot, ship)
     {
         shipCrashed(ship, shot);
+        scoreText.setText('Score: ' + kill_count + "- GAME OVER!");
+        scoreText.setColor("#F00");
+        game.destroy();
     }
     function shoot()
     {
