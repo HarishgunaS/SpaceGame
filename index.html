@@ -67,6 +67,7 @@
             y = (ship.y < 300) ? Phaser.Math.Between(300, 600) : Phaser.Math.Between(0, 300);
         }
         var enemy = enemies.create(x, y, 'enemy');
+        enemy.tint = 0xff0000;
     }
     function shipCrashed(ship, enemy)
     {
@@ -92,6 +93,7 @@
         this.physics.add.collider(ship_shots, enemies, enemyHit, null, this);
         this.physics.add.collider(enemies, enemies);
         this.physics.add.collider(ship, enemies);
+        scoreText = this.add.text(16,16, 'score: 0', {fontSize: '32px', fill: '#FFF'});
     }
     function shoot()
     {
@@ -108,6 +110,7 @@
         enemy.destroy();
         enemy_count -= 1;
         kill_count += 1;
+        scoreText.setText('Score: ' + kill_count);
     }
     function update()
     {
