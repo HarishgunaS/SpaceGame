@@ -36,11 +36,12 @@
     var max_speed = 200;
     var num_enemies = 1;
     var enemy_count = 0;
-    var enemy_speed = 150;
+    var enemy_speed = 50;
     var previous_space = false;
     var kill_count = 0;
     var acceleration = 4;
     var multiplier = 1;
+    var previous_time = 0;
     function addEnemy()
     {
         var edge = Phaser.Math.Between(1,4);
@@ -89,11 +90,18 @@
         cursors = this.input.keyboard.createCursorKeys();
         enemies = this.physics.add.group();
         ship_shots = this.physics.add.group();
+        enemy_shots = this.physics.add.group();
         //this.physics.add.collider(ship, enemies, shipCrashed, null, this);
         this.physics.add.collider(ship_shots, enemies, enemyHit, null, this);
+        this.physics.add.collider(enemy_shots, ship, shipHit, null, this);
         this.physics.add.collider(enemies, enemies);
         this.physics.add.collider(ship, enemies);
         scoreText = this.add.text(16,16, 'score: 0', {fontSize: '32px', fill: '#FFF'});
+        
+    }
+    function shipHit(shot, ship)
+    {
+        shipCrashed(ship, shot);
     }
     function shoot()
     {
@@ -114,6 +122,7 @@
     }
     function update()
     {
+        var current_time = new Date();
         if ((kill_count - (kill_count%10))/10 > num_enemies)
             num_enemies += 1;
         enemies.children.iterate(function (child) {
@@ -125,18 +134,20 @@
             else if (y < 0)
                 child.rotation += 2*Math.PI;
             child.setVelocity(enemy_speed*Math.sin(child.rotation), -1*enemy_speed*Math.cos(child.rotation));
-            
+            if (Phaser.Math.Between(1,50) == 1)
+            {
+                var shot_x = child.x;
+                var shot_y = child.y;
+                var shot = enemy_shots.create(shot_x, shot_y, 'laser');
+                shot.tint = 0xff0000;
+                shot.setVelocity(1.5*enemy_speed*Math.sin(child.rotation), -1.5*enemy_speed*Math.cos(child.rotation));
+            }   
         });
-        if (cursors.space.isDown && !previous_space)
+        if (cursors.space.isDown && (current_time - previous_time) > 500)
         {
             shoot();
-            previous_space = true;
-        }
-        else if (previous_space && !cursors.space.isDown)
-        {
-            previous_space = false;
-        }
-        
+            previous_time = current_time;
+        }        
         if (enemy_count < num_enemies)
         {
             addEnemy();
